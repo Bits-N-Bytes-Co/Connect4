@@ -126,12 +126,12 @@ void game_run_turn(Game *game) {
   int chosen_col = 0;
   game_show(game);
   // Asks for input and drops the token
-  printf("%s, choose a column to drop your token in: ",
+  printf("%s's turn.",
          (game->current_player == 1) ? game->player1 : game->player2);
   scanf("%d", &chosen_col);
   chosen_col--;
   while (!game_put_token(game, chosen_col, game->current_player)) {
-    printf("Column %d is full, please enter another column: ", chosen_col + 1);
+    printf("Column %d is full, please choose another column: ", chosen_col + 1);
     scanf("%d", &chosen_col);
     chosen_col--;
   };
