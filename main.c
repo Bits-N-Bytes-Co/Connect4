@@ -162,7 +162,7 @@ GameState game_check_state(Game *game, int x) {
   }
 
   // Check tie
-  for (int temp_x; temp_x < COL_NUM; temp_x++) {
+  for (int temp_x=0; temp_x < COL_NUM; temp_x++) {
     if (game->grid[ROW_NUM - 1][temp_x] == EMPTY) {
       return ONGOING;
     }
