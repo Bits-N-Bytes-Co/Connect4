@@ -6,6 +6,7 @@
 #define COL_NUM 7
 #define MAX_NAME_LENGTH 50
 #define PLAYERS_NUM 2
+#define CONNECTED_TOKENS_NUM 4
 
 typedef enum Token { EMPTY = 0, RED = 1, YELLOW = 2 } Token;
 
@@ -25,8 +26,7 @@ typedef struct Player {
 typedef struct Game {
   Token grid[ROW_NUM][COL_NUM];
   Player players[PLAYERS_NUM];
-  int current_player_index; // holds index in players[] array, which represents
-                            // who's turn it is
+  int current_player_index;
   GameState game_state;
 } Game;
 
@@ -40,20 +40,27 @@ GameState game_check_state(Game *game, int x) {
   y--;
 
   // Check vertical
-  if (y >= 3 && game->grid[y][x] == game->grid[y - 1][x] &&
-      game->grid[y - 1][x] == game->grid[y - 2][x] &&
-      game->grid[y - 2][x] == game->grid[y - 3][x]) {
+  int vertical_counter = 0;
+  for (int temp_y = y; temp_y > y - CONNECTED_TOKENS_NUM; temp_y--) {
+    if (game->grid[temp_y][x] == game->grid[y][x]) {
+      vertical_counter++;
+    } else {
+      break;
+    }
+  }
+  if (vertical_counter == CONNECTED_TOKENS_NUM) {
     return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
   }
+
   // Check horizontal
-  int counter = 0;
+  int horizontal_counter = 0;
   for (int temp_x = 0; temp_x < COL_NUM; temp_x++) {
     if (game->grid[y][temp_x] == game->grid[y][x]) {
-      counter++;
+      horizontal_counter++;
     } else {
-      counter = 0;
+      horizontal_counter = 0;
     }
-    if (counter == 4) {
+    if (horizontal_counter == CONNECTED_TOKENS_NUM) {
       return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
     }
   }
@@ -61,7 +68,8 @@ GameState game_check_state(Game *game, int x) {
   // Check diagonal
   int counter_asc = 0;
   int counter_des = 0;
-  for (int temp = -3; temp <= 3; temp++) {
+  for (int temp = -CONNECTED_TOKENS_NUM + 1; temp <= CONNECTED_TOKENS_NUM - 1;
+       temp++) {
     if (game->grid[y + temp][x + temp] == game->grid[y][x]) {
       counter_asc++;
     } else {
@@ -72,7 +80,8 @@ GameState game_check_state(Game *game, int x) {
     } else {
       counter_des = 0;
     }
-    if (counter_asc == 4 || counter_des == 4) {
+    if (counter_asc == CONNECTED_TOKENS_NUM ||
+        counter_des == CONNECTED_TOKENS_NUM) {
       return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
     }
   }
@@ -90,7 +99,7 @@ GameState game_check_state(Game *game, int x) {
 bool game_put_token(Game *game, int x) {
   for (int y = 0; y < ROW_NUM; y++) {
     if (game->grid[y][x] == EMPTY) {
-      game->grid[y][x] = (game->players[game->current_player_index].token);
+      game->grid[y][x] = game->players[game->current_player_index].token;
       return true;
     }
   }
@@ -125,11 +134,9 @@ void game_init(Game *game) {
     game->players[player_num - 1].total_time = 0;
     printf("Player %d, please enter your name: ", player_num);
     scanf("%s", game->players[player_num - 1].name);
+    game->players[player_num - 1].token = (Token)player_num;
   }
   printf("\n");
-
-  game->players[0].token = RED;
-  game->players[1].token = YELLOW;
 
   game->game_state = ONGOING;
   game->current_player_index = 0;
