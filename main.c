@@ -5,6 +5,7 @@
 #define ROW_NUM 6
 #define COL_NUM 7
 #define MAX_NAME_LENGTH 50
+#define PLAYERS_NUM 2
 
 typedef enum Token { EMPTY = 0, RED = 1, YELLOW = 2 } Token;
 
@@ -15,11 +16,17 @@ typedef enum GameState {
   TIE = 3
 } GameState;
 
+typedef struct Player {
+  char name[MAX_NAME_LENGTH];
+  Token token;
+  double total_time;
+} Player;
+
 typedef struct Game {
   Token grid[ROW_NUM][COL_NUM];
-  int current_player;
-  char player1[MAX_NAME_LENGTH];
-  char player2[MAX_NAME_LENGTH];
+  Player players[PLAYERS_NUM];
+  int current_player_index; // holds index in players[] array, which represents
+                            // who's turn it is
   GameState game_state;
 } Game;
 
@@ -80,10 +87,10 @@ GameState game_check_state(Game *game, int x) {
 }
 
 // will add the token, returns true if it works
-bool game_put_token(Game *game, int x, int current_player) {
+bool game_put_token(Game *game, int x) {
   for (int y = 0; y < ROW_NUM; y++) {
     if (game->grid[y][x] == EMPTY) {
-      game->grid[y][x] = (current_player == 1) ? RED : YELLOW;
+      game->grid[y][x] = (game->players[game->current_player_index].token);
       return true;
     }
   }
@@ -104,38 +111,43 @@ void game_show(Game *game) {
 }
 
 void game_init(Game *game) {
+  printf("--------/Welcome to Connect 4/--------\n\n");
+
   // Initializing the grid
   for (int i = 0; i < ROW_NUM; i++) {
     for (int j = 0; j < COL_NUM; j++) {
       game->grid[i][j] = EMPTY;
     }
   }
+
   // Initializing the players
-  printf("--------/Welcome to Connect 4/--------\n\n");
-  printf("Player 1, please enter your name: ");
-  scanf("%s", game->player1);
-  printf("Player 2, please enter your name: ");
-  scanf("%s", game->player2);
+  for (int player_num = 1; player_num <= PLAYERS_NUM; player_num++) {
+    game->players[player_num - 1].total_time = 0;
+    printf("Player %d, please enter your name: ", player_num);
+    scanf("%s", game->players[player_num - 1].name);
+  }
   printf("\n");
 
+  game->players[0].token = RED;
+  game->players[1].token = YELLOW;
+
   game->game_state = ONGOING;
-  game->current_player = 1;
+  game->current_player_index = 0;
 }
 
 void game_run_turn(Game *game) {
   int chosen_col = 0;
   game_show(game);
   // Asks for input and drops the token
-  printf("%s's turn.",
-         (game->current_player == 1) ? game->player1 : game->player2);
+  printf("%s's turn.", game->players[game->current_player_index].name);
   scanf("%d", &chosen_col);
   chosen_col--;
-  while (!game_put_token(game, chosen_col, game->current_player)) {
+  while (!game_put_token(game, chosen_col)) {
     printf("Column %d is full, please choose another column: ", chosen_col + 1);
     scanf("%d", &chosen_col);
     chosen_col--;
   };
-  game->current_player = (game->current_player == 1) ? 2 : 1;
+  game->current_player_index = (game->current_player_index + 1) % PLAYERS_NUM;
   game->game_state = game_check_state(game, chosen_col);
 }
 
