@@ -1,111 +1,4 @@
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define ROW_NUM 6
-#define COL_NUM 7
-#define MAX_NAME_LENGTH 50
-#define PLAYERS_NUM 2
-#define CONNECTED_TOKENS_NUM 4
-#define BUFFER_SIZE 1000
-
-typedef enum token { EMPTY = 0, RED = 1, YELLOW = 2 } Token;
-
-typedef enum gameState {
-  ONGOING = 0,
-  RED_WINS = 1,
-  YELLOW_WINS = 2,
-  TIE = 3
-} GameState;
-
-typedef struct player {
-  char name[MAX_NAME_LENGTH];
-  Token token;
-  double total_time;
-} Player;
-
-typedef struct game {
-  Token grid[ROW_NUM][COL_NUM];
-  Player players[PLAYERS_NUM];
-  int current_player_index;
-  GameState game_state;
-} Game;
-
-/**
- * Parses a string into a positive integer if the sting is of the right format
- * tested formats (e.g. for the int 2):
- *
- * valid: "   2   ", "000..02", "2", "\t2", "\n2"
- * invalid: "2 2", "2.2", "abc", "-2", "  2  2  "
- */
-bool validate_input(char *string, int *integer) {
-  int i = 0;
-  int length = strlen(string);
-  char buffer[BUFFER_SIZE];
-  int buffer_index = 0;
-
-  while (isspace(string[i])) {
-    i++;
-  }
-
-  if (length == i) {
-    return false;
-  }
-
-  while (i < length && !isspace(string[i])) {
-    if (!isdigit(string[i])) {
-      return false;
-    }
-    buffer[buffer_index] = string[i];
-    buffer_index++;
-    i++;
-  }
-
-  buffer[buffer_index] = '\0';
-
-  while (isspace(string[i])) {
-    i++;
-  }
-
-  if (string[i] != '\0') {
-    return false;
-  }
-
-  *integer = atoi(buffer);
-
-  return true;
-}
-
-/**
-  removes endl char at the end of a string
-*/
-void remove_delimiter(char *string) {
-  int i = 0;
-  while (string[i] != '\0')
-    i++;
-
-  if (i > 1 && string[i - 1] == '\n') {
-    string[i - 1] = '\0';
-  }
-}
-
-void take_valid_input(int *col) {
-  bool input_is_valid = true;
-
-  do {
-    char buffer[BUFFER_SIZE];
-    fgets(buffer, BUFFER_SIZE, stdin);
-
-    input_is_valid = validate_input(buffer, col);
-    input_is_valid = input_is_valid && *col > 0 && *col < 8;
-
-    if (!input_is_valid) {
-      printf("Invalid input. Please enter an integer between 1 and 7: ");
-    }
-  } while (!input_is_valid);
-}
+#include "../include/Game.h"
 
 /**
   Takes as an input the coordinates of the last dropped token
@@ -174,9 +67,6 @@ GameState game_check_state(Game *game, int x) {
   return TIE;
 }
 
-/**
-  Adds the token to the column, returns true if it works
-*/
 bool game_put_token(Game *game, int x) {
   for (int y = 0; y < ROW_NUM; y++) {
     if (game->grid[y][x] == EMPTY) {
@@ -214,7 +104,7 @@ void game_init(Game *game) {
   for (int player_num = 1; player_num <= PLAYERS_NUM; player_num++) {
     game->players[player_num - 1].total_time = 0;
     printf("Player %d, please enter your name: ", player_num);
-    fgets(game->players[player_num - 1].name, MAX_NAME_LENGTH, stdin);
+    fgets(game->players[player_num - 1].name, MAX_INPUT_LENGTH, stdin);
     remove_delimiter(game->players[player_num - 1].name);
     game->players[player_num - 1].token = (Token)player_num;
   }
@@ -260,12 +150,4 @@ void game_run(Game *game) {
     printf("TIE!\n");
     break;
   }
-}
-
-int main() {
-  Game *game = malloc(sizeof(Game));
-  game_init(game);
-  game_run(game);
-  free(game);
-  return 0;
 }
