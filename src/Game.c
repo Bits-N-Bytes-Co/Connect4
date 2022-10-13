@@ -1,5 +1,6 @@
 #include "../include/Game.h"
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /**
   Takes as an input the coordinates of the last dropped token
@@ -92,7 +93,7 @@ void game_show(Game *game) {
 }
 
 void game_init(Game *game) {
-  printf("--------/Welcome to Connect 4/--------\n\n");
+   printf("--------/Welcome to Connect 4/--------\n\n");
 
   // Initializing the grid
   for (int i = 0; i < ROW_NUM; i++) {
@@ -102,6 +103,8 @@ void game_init(Game *game) {
   }
 
   // Initializing the players
+  char **taken_names = malloc(sizeof(char *) * PLAYERS_NUM);
+  int name_index = 0;
   printf("Please enter your names: \n");
   for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
     bool name_valid = false;
@@ -129,7 +132,29 @@ void game_init(Game *game) {
       }
 
       if (name_valid) {
-        strcpy_s(game->players[player_num].name, sizeof(char *), input);
+        bool name_taken = false;
+        if (name_index >= 0) {
+          for (int n = 0; n < name_index; n++) {
+            if (strcmp(input, taken_names[n]) == 0) {
+              name_taken = true;
+            }
+          }
+        }
+        if (!name_taken || name_index == 0) {
+          taken_names[name_index] = malloc(sizeof(char *));
+          int j = 0;
+          while (input[j] != '\0') {
+            game->players[player_num].name[j] = input[j];
+            taken_names[name_index][j] = input[j];
+            j++;
+          }
+          game->players[player_num].name[j] = '\0';
+          taken_names[name_index][j] = '\0';
+          name_index++;
+        } else {
+          printf("Name is already taken. Please try again.\n");
+          name_valid = false;
+        }
       }
     }
     game->players[player_num].total_time = 0;
@@ -139,6 +164,8 @@ void game_init(Game *game) {
 
   game->game_state = ONGOING;
   game->current_player_index = 0;
+
+  free(taken_names);
 }
 
 void game_run_turn(Game *game) {
