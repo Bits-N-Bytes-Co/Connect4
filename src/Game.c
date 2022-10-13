@@ -1,4 +1,5 @@
 #include "../include/Game.h"
+#include <string.h>
 
 /**
   Takes as an input the coordinates of the last dropped token
@@ -101,12 +102,38 @@ void game_init(Game *game) {
   }
 
   // Initializing the players
-  for (int player_num = 1; player_num <= PLAYERS_NUM; player_num++) {
-    game->players[player_num - 1].total_time = 0;
-    printf("Player %d, please enter your name: ", player_num);
-    fgets(game->players[player_num - 1].name, MAX_INPUT_LENGTH, stdin);
-    remove_delimiter(game->players[player_num - 1].name);
-    game->players[player_num - 1].token = (Token)player_num;
+  printf("Please enter your names: \n");
+  for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
+    bool name_valid = false;
+    while (!name_valid) {
+      int i = 0;
+      char input[MAX_INPUT_LENGTH];
+      printf("Name: ");
+      fgets(input, MAX_INPUT_LENGTH, stdin);
+      if (strlen(input) == 1) {
+        printf("Invalid input. Names cannot be empty. Please try "
+               "again.\n");
+        continue;
+      }
+      remove_delimiter(input);
+      while (input[i] != '\0') {
+        if (input[i] == ' ' || input[i] == '\t') {
+          name_valid = false;
+          printf("Invalid input. Names cannot contain white spaces. Please try "
+                 "again.\n");
+          break;
+        } else {
+          name_valid = true;
+        }
+        i++;
+      }
+
+      if (name_valid) {
+        strcpy_s(game->players[player_num].name, sizeof(char *), input);
+      }
+    }
+    game->players[player_num].total_time = 0;
+    game->players[player_num].token = (Token)(player_num + 1);
   }
   printf("\n");
 
