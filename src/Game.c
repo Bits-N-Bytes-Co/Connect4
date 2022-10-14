@@ -1,10 +1,6 @@
 #include "../include/Game.h"
 #include <stdio.h>
 
-/**
-  Takes as an input the coordinates of the last dropped token
-  Assumes that the game was ongoing before the last drop of a token
-*/
 GameState game_check_state(Game *game, int x) {
   int y = 0;
   while (y < ROW_NUM && game->grid[y][x] != EMPTY) {
@@ -41,25 +37,27 @@ GameState game_check_state(Game *game, int x) {
   // Check diagonal
   int counter_asc = 0;
   int counter_des = 0;
-   // Ascending diagonal
+  // Ascending diagonal
   for (int temp = -CONNECTED_TOKENS_NUM + 1; temp <= CONNECTED_TOKENS_NUM - 1;
        temp++) {
     if (game->grid[y + temp][x + temp] == game->grid[y][x] && (y + temp >= 0) &&
-        (y + temp < ROW_NUM) && (x + temp >= 0) && (x + temp < COL_NUM)) {      //to make sure that the index does not wrap around 
+        (y + temp < ROW_NUM) && (x + temp >= 0) &&
+        (x + temp <
+         COL_NUM)) { // to make sure that the index does not wrap around
       counter_asc++;
     } else {
-      
+
       counter_asc = 0;
     }
     // Descending diagonal
     if (game->grid[y + temp][x - temp] == game->grid[y][x] && (y + temp >= 0) &&
         (y + temp < COL_NUM) && (x - temp >= 0) && (x - temp < ROW_NUM)) {
-      
+
       counter_des++;
     } else {
       counter_des = 0;
-    } 
-    
+    }
+
     if (counter_asc == CONNECTED_TOKENS_NUM ||
         counter_des == CONNECTED_TOKENS_NUM) {
       return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
