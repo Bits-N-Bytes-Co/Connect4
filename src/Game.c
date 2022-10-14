@@ -97,15 +97,24 @@ bool game_put_token(Game *game, int x) {
 }
 
 void game_show(Game *game) {
-  printf("| 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n");
-  printf("| - + - + - + - + - + - + - |\n");
+  system("cls");
+  printf("|  1 |  2 |  3 |  4 |  5 |  6 |  7 |\n");
+  printf("| -- + -- + -- + -- + -- + -- + -- |\n");
   for (int y = ROW_NUM - 1; y >= 0; y--) {
     printf("|");
     for (int x = 0; x < COL_NUM; x++) {
-      printf(" %d |", game->grid[y][x]);
+      if (game->grid[y][x] == RED) {
+        printf(" \033[0;31m%c%c\033[0m ", 219, 219);
+        printf("|");
+      } else if (game->grid[y][x] == YELLOW) {
+        printf(" \033[0;33m%c%c\033[0m ", 219, 219);
+        printf("|");
+      } else {
+        printf("    |");
+      }
     }
     printf("\n");
-    printf("| - + - + - + - + - + - + - |\n");
+    printf("| -- + -- + -- + -- + -- + -- + -- |\n");
   }
 }
 
@@ -213,7 +222,11 @@ void game_run_turn(Game *game) {
   int chosen_col = 0;
   game_show(game);
   // Asks for input and drops the token
-  printf("%s's turn.", game->players[game->current_player_index].name);
+  game->players[game->current_player_index].token == RED
+      ? printf("\033[0;31m%s's\033[0m turn. ",
+               game->players[game->current_player_index].name)
+      : printf("\033[0;33m%s's\033[0m turn. ",
+               game->players[game->current_player_index].name);
   clock_t start = clock();
   take_valid_input(&chosen_col);
   chosen_col--;
