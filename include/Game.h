@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputManager.h"
+#include "Graphics.h"
 #include <time.h>
 
 #define ROW_NUM 6
@@ -70,6 +71,13 @@ Prints out the game grid to stdout
 void game_show(Game *game);
 
 /**
+Prints the tokens each player has after flipping a coin
+@input:
+  Game `game`
+*/
+void game_players_screen(Game* game);
+
+/**
 Initializes Game `game` and asks players for their names
 @input:
   Game `game`
@@ -94,3 +102,10 @@ Runs the Game `game` until the `game_state` is not `ONGOING`
   Game has been initialized
 */
 void game_run(Game *game);
+
+/**
+Prints which player won and displays the amount of time each of them took
+@input:
+  Game `game`
+*/
+void game_end_screen(Game *game);

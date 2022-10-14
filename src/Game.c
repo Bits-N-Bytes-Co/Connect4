@@ -1,5 +1,57 @@
 #include "../include/Game.h"
 
+void game_end_screen(Game *game) {
+  CLEAR();
+  printf("-----------------------------------------------------------------"
+         "\n\n\n\n\n");
+  switch (game->game_state) {
+  case ONGOING:
+    printf(
+        "                 ERROR: the game is not over yet                 \n");
+    break;
+  case RED_WINS:
+    printf("                            \033[0;31mRED WON!\033[0m              "
+           "               \n");
+    break;
+  case YELLOW_WINS:
+    printf("                         \033[0;33mYELLOW WON!\033[0m              "
+           "             \n");
+    break;
+  case TIE:
+    printf("                            \033[0;32mTIE!\033[0m                  "
+           "             \n");
+    break;
+  case RED_WON_BY_TIME:
+    printf("                            \033[0;31mRED WON BY TIME!\033[0m      "
+           "                         \n");
+    break;
+  case YELLOW_WON_BY_TIME:
+    printf(
+        "                            \033[0;33mYELLOW WON BY TIME!\033[0m      "
+        "                         \n");
+    break;
+  default:
+    break;
+  }
+  printf("\n");
+  game->players[0].token == RED
+      ? printf("                      \033[0;31m%s\033[0m: %.3f seconds        "
+               "          \n",
+               game->players[0].name, game->players[0].total_time)
+      : printf("                      \033[0;33m%s\033[0m: %.3f seconds        "
+               "          \n",
+               game->players[0].name, game->players[0].total_time);
+  game->players[1].token == RED
+      ? printf("                      \033[0;31m%s\033[0m: %.3f seconds        "
+               "          \n",
+               game->players[1].name, game->players[1].total_time)
+      : printf("                      \033[0;33m%s\033[0m: %.3f seconds        "
+               "          \n",
+               game->players[1].name, game->players[1].total_time);
+  printf("\n\n\n\n\n-----------------------------------------------------------"
+         "------\n");
+}
+
 GameState game_check_state(Game *game, int x) {
   int y = 0;
   while (y < ROW_NUM && game->grid[y][x] != EMPTY) {
@@ -97,17 +149,20 @@ bool game_put_token(Game *game, int x) {
 }
 
 void game_show(Game *game) {
-  system("cls");
+  CLEAR();
+  printf("\033[0;32mTimer\033[0m\n");
+  printf("%s: %.3f s\t", game->players[0].name, game->players[0].total_time);
+  printf("%s: %.3f s\n", game->players[1].name, game->players[1].total_time);
   printf("|  1 |  2 |  3 |  4 |  5 |  6 |  7 |\n");
   printf("| -- + -- + -- + -- + -- + -- + -- |\n");
   for (int y = ROW_NUM - 1; y >= 0; y--) {
     printf("|");
     for (int x = 0; x < COL_NUM; x++) {
       if (game->grid[y][x] == RED) {
-        printf(" \033[0;31m%c%c\033[0m ", 219, 219);
+        PRINTREDTOKEN();
         printf("|");
       } else if (game->grid[y][x] == YELLOW) {
-        printf(" \033[0;33m%c%c\033[0m ", 219, 219);
+        PRINTYELLOWTOKEN();
         printf("|");
       } else {
         printf("    |");
@@ -118,8 +173,21 @@ void game_show(Game *game) {
   }
 }
 
+void game_players_screen(Game* game) {
+  CLEAR();
+  char a[MAX_INPUT_LENGTH];
+
+  for (int i = 0; i<PLAYERS_NUM; i++) {
+    printf("Player %d:\n", (i+1));
+    printf("Name: %s\n", game->players[i].name);
+    printf("Token: %s\n\n", (game->players[i].token==RED)?"\033[0;31mRED\033[0m":"\033[0;33mYELLOW\033[0m");
+  }
+  printf("\033[0;34mPress enter to continue\033[0m");
+  fgets(a, MAX_INPUT_LENGTH, stdin);
+}
+
 void game_init(Game *game) {
-  printf("--------/Welcome to Connect 4/--------\n\n");
+  STARTSCREEN();
 
   // Initializing the grid
   for (int i = 0; i < ROW_NUM; i++) {
@@ -134,7 +202,7 @@ void game_init(Game *game) {
   char **taken_names = malloc(sizeof(char *) * PLAYERS_NUM);
   int name_index = 0;
   bool name_valid;
-  printf("Please enter your names: \n");
+  printf("Please enter your names \n");
 
   for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
     do {
@@ -216,6 +284,8 @@ void game_init(Game *game) {
   }
   free(taken_names);
   taken_names = NULL;
+
+  game_players_screen(game);
 }
 
 void game_run_turn(Game *game) {
@@ -249,26 +319,5 @@ void game_run(Game *game) {
   }
 
   game_show(game);
-  switch (game->game_state) {
-  case ONGOING:
-    printf("ERROR: the game is not over yet\n");
-    break;
-  case RED_WINS:
-    printf("RED WON!\n");
-    break;
-  case YELLOW_WINS:
-    printf("YELLOW WON!\n");
-    break;
-  case RED_WON_BY_TIME:
-    printf("RED WON BY TIME!");
-    break;
-  case YELLOW_WON_BY_TIME:
-    printf("YELLOW WON BY TIME!");
-    break;
-  case TIE:
-    printf("TIE!\n");
-    break;
-  default:
-    break;
-  }
+  game_end_screen(game);
 }
