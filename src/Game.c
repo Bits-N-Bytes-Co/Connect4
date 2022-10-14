@@ -35,19 +35,19 @@ void game_end_screen(Game *game) {
   }
   printf("\n");
   game->players[0].token == RED
-      ? printf("                      \033[0;31m%s\033[0m: %.3f seconds        "
+      ? printf("                      \033[0;31m%s\033[0m: %d seconds        "
                "          \n",
-               game->players[0].name, game->players[0].total_time)
-      : printf("                      \033[0;33m%s\033[0m: %.3f seconds        "
+               game->players[0].name, (int)game->players[0].total_time)
+      : printf("                      \033[0;33m%s\033[0m: %d seconds        "
                "          \n",
-               game->players[0].name, game->players[0].total_time);
+               game->players[0].name, (int)game->players[0].total_time);
   game->players[1].token == RED
-      ? printf("                      \033[0;31m%s\033[0m: %.3f seconds        "
+      ? printf("                      \033[0;31m%s\033[0m: %d seconds        "
                "          \n",
-               game->players[1].name, game->players[1].total_time)
-      : printf("                      \033[0;33m%s\033[0m: %.3f seconds        "
+               game->players[1].name, (int)game->players[1].total_time)
+      : printf("                      \033[0;33m%s\033[0m: %d seconds        "
                "          \n",
-               game->players[1].name, game->players[1].total_time);
+               game->players[1].name, (int)game->players[1].total_time);
   printf("\n\n\n\n\n-----------------------------------------------------------"
          "------\n");
 }
@@ -151,8 +151,8 @@ bool game_put_token(Game *game, int x) {
 void game_show(Game *game) {
   CLEAR();
   printf("\033[0;32mTimer\033[0m\n");
-  printf("%s: %.3f s\t", game->players[0].name, game->players[0].total_time);
-  printf("%s: %.3f s\n", game->players[1].name, game->players[1].total_time);
+  printf("%s: %d s\t", game->players[0].name, (int)game->players[0].total_time);
+  printf("%s: %d s\n", game->players[1].name, (int)game->players[1].total_time);
   printf("|  1 |  2 |  3 |  4 |  5 |  6 |  7 |\n");
   printf("| -- + -- + -- + -- + -- + -- + -- |\n");
   for (int y = ROW_NUM - 1; y >= 0; y--) {
@@ -173,14 +173,16 @@ void game_show(Game *game) {
   }
 }
 
-void game_players_screen(Game* game) {
+void game_players_screen(Game *game) {
   CLEAR();
   char a[MAX_INPUT_LENGTH];
 
-  for (int i = 0; i<PLAYERS_NUM; i++) {
-    printf("Player %d:\n", (i+1));
+  for (int i = 0; i < PLAYERS_NUM; i++) {
+    printf("Player %d:\n", (i + 1));
     printf("Name: %s\n", game->players[i].name);
-    printf("Token: %s\n\n", (game->players[i].token==RED)?"\033[0;31mRED\033[0m":"\033[0;33mYELLOW\033[0m");
+    printf("Token: %s\n\n", (game->players[i].token == RED)
+                                ? "\033[0;31mRED\033[0m"
+                                : "\033[0;33mYELLOW\033[0m");
   }
   printf("\033[0;34mPress enter to continue\033[0m");
   fgets(a, MAX_INPUT_LENGTH, stdin);
@@ -297,7 +299,7 @@ void game_run_turn(Game *game) {
                game->players[game->current_player_index].name)
       : printf("\033[0;33m%s's\033[0m turn. ",
                game->players[game->current_player_index].name);
-  clock_t start = clock();
+  time_t start = time(NULL);
   take_valid_input(&chosen_col);
   chosen_col--;
   while (!game_put_token(game, chosen_col)) {
@@ -306,7 +308,8 @@ void game_run_turn(Game *game) {
     chosen_col--;
   };
 
-  double diff = (double)(clock() - start) / CLOCKS_PER_SEC;
+  time_t end = time(NULL);
+  double diff = end - start;
   game->players[game->current_player_index].total_time += diff;
 
   game->current_player_index = (game->current_player_index + 1) % PLAYERS_NUM;
