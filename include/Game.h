@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputManager.h"
+#include <time.h>
 
 #define ROW_NUM 6
 #define COL_NUM 7
@@ -13,7 +14,9 @@ typedef enum gameState {
   ONGOING = 0,
   RED_WINS = 1,
   YELLOW_WINS = 2,
-  TIE = 3
+  TIE = 3,
+  RED_WON_BY_TIME = 4,
+  YELLOW_WON_BY_TIME = 5
 } GameState;
 
 typedef struct player {

@@ -70,7 +70,21 @@ GameState game_check_state(Game *game, int x) {
       return ONGOING;
     }
   }
-  return TIE;
+  if (game->players[0].total_time > game->players[1].total_time) {
+    printf("%s's time (%d): %.3fs\n", game->players[0].name,
+           game->players[0].token, game->players[0].total_time);
+    printf("%s's time (%d): %.3fs\n", game->players[1].name,
+           game->players[1].token, game->players[1].total_time);
+    return game->players[1].token == RED ? RED_WON_BY_TIME : YELLOW_WON_BY_TIME;
+  } else if (game->players[0].total_time < game->players[1].total_time) {
+    printf("%s's time (%d): %.3fs\n", game->players[0].name,
+           game->players[0].token, game->players[0].total_time);
+    printf("%s's time (%d): %.3fs\n", game->players[1].name,
+           game->players[1].token, game->players[1].total_time);
+    return game->players[0].token == RED ? RED_WON_BY_TIME : YELLOW_WON_BY_TIME;
+  } else {
+    return TIE;
+  }
 }
 
 bool game_put_token(Game *game, int x) {
@@ -125,6 +139,7 @@ void game_run_turn(Game *game) {
   game_show(game);
   // Asks for input and drops the token
   printf("%s's turn.", game->players[game->current_player_index].name);
+  clock_t start = clock();
   take_valid_input(&chosen_col);
   chosen_col--;
   while (!game_put_token(game, chosen_col)) {
@@ -132,6 +147,10 @@ void game_run_turn(Game *game) {
     take_valid_input(&chosen_col);
     chosen_col--;
   };
+
+  double diff = (double)(clock() - start) / CLOCKS_PER_SEC;
+  game->players[game->current_player_index].total_time += diff;
+
   game->current_player_index = (game->current_player_index + 1) % PLAYERS_NUM;
   game->game_state = game_check_state(game, chosen_col);
 }
@@ -152,8 +171,16 @@ void game_run(Game *game) {
   case YELLOW_WINS:
     printf("YELLOW WON!\n");
     break;
+  case RED_WON_BY_TIME:
+    printf("RED WON BY TIME!");
+    break;
+  case YELLOW_WON_BY_TIME:
+    printf("YELLOW WON BY TIME!");
+    break;
   case TIE:
     printf("TIE!\n");
+    break;
+  default:
     break;
   }
 }
