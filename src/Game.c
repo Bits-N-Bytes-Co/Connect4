@@ -1,5 +1,4 @@
 #include "../include/Game.h"
-#include <stdio.h>
 
 GameState game_check_state(Game *game, int x) {
   int y = 0;
@@ -111,7 +110,7 @@ void game_show(Game *game) {
 }
 
 void game_init(Game *game) {
-  printf("--------/Welcome to Connect 4/--------\n\n");
+   printf("--------/Welcome to Connect 4/--------\n\n");
 
   // Initializing the grid
   for (int i = 0; i < ROW_NUM; i++) {
@@ -121,17 +120,69 @@ void game_init(Game *game) {
   }
 
   // Initializing the players
-  for (int player_num = 1; player_num <= PLAYERS_NUM; player_num++) {
-    game->players[player_num - 1].total_time = 0;
-    printf("Player %d, please enter your name: ", player_num);
-    fgets(game->players[player_num - 1].name, MAX_INPUT_LENGTH, stdin);
-    remove_delimiter(game->players[player_num - 1].name);
-    game->players[player_num - 1].token = (Token)player_num;
+  char **taken_names = malloc(sizeof(char *) * PLAYERS_NUM);
+  int name_index = 0;
+  printf("Please enter your names: \n");
+  for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
+    bool name_valid = false;
+    while (!name_valid) {
+      int i = 0;
+      char input[MAX_INPUT_LENGTH];
+      printf("Name: ");
+      fgets(input, MAX_INPUT_LENGTH, stdin);
+      if (strlen(input) == 1) {
+        printf("Invalid input. Names cannot be empty. Please try "
+               "again.\n");
+        continue;
+      }
+      remove_delimiter(input);
+      while (input[i] != '\0') {
+        if (input[i] == ' ' || input[i] == '\t') {
+          name_valid = false;
+          printf("Invalid input. Names cannot contain white spaces. Please try "
+                 "again.\n");
+          break;
+        } else {
+          name_valid = true;
+        }
+        i++;
+      }
+
+      if (name_valid) {
+        bool name_taken = false;
+        if (name_index >= 0) {
+          for (int n = 0; n < name_index; n++) {
+            if (strcmp(input, taken_names[n]) == 0) {
+              name_taken = true;
+            }
+          }
+        }
+        if (!name_taken || name_index == 0) {
+          taken_names[name_index] = malloc(sizeof(char *));
+          int j = 0;
+          while (input[j] != '\0') {
+            game->players[player_num].name[j] = input[j];
+            taken_names[name_index][j] = input[j];
+            j++;
+          }
+          game->players[player_num].name[j] = '\0';
+          taken_names[name_index][j] = '\0';
+          name_index++;
+        } else {
+          printf("Name is already taken. Please try again.\n");
+          name_valid = false;
+        }
+      }
+    }
+    game->players[player_num].total_time = 0;
+    game->players[player_num].token = (Token)(player_num + 1);
   }
   printf("\n");
 
   game->game_state = ONGOING;
   game->current_player_index = 0;
+
+  free(taken_names);
 }
 
 void game_run_turn(Game *game) {
