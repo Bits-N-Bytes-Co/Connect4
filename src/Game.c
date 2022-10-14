@@ -238,15 +238,6 @@ void game_init(Game *game) {
         continue;
       }
 
-      // If the name is already taken
-      for (int n = 0; n < name_index; n++) {
-        if (strcmp(input, taken_names[n]) == 0) {
-          printf("Name \"%s\" is already taken. Please try again.\n", input);
-          name_valid = false;
-          continue;
-        }
-      }
-
       // Allocating the name to game
       taken_names[name_index] = malloc(sizeof(char *));
       int j = 0;
