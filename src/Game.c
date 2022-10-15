@@ -52,58 +52,62 @@ void game_end_screen(Game *game) {
          "------\n");
 }
 
-GameState game_check_state(Game *game, int x) {
+GameState game_check_state(Game *game, int x) { //note: rows are y and columns are x.
   int y = 0;
   while (y < ROW_NUM && game->grid[y][x] != EMPTY) {
     y++;
   }
   y--;
 
+  Token lastDroppedToken = game->grid[y][x];
+
   // Check vertical
   int vertical_counter = 0;
   for (int temp_y = y; temp_y > y - CONNECTED_TOKENS_NUM; temp_y--) {
-    if (game->grid[temp_y][x] == game->grid[y][x]) {
+    if (game->grid[temp_y][x] == lastDroppedToken) {
       vertical_counter++;
     } else {
       break;
     }
   }
   if (vertical_counter == CONNECTED_TOKENS_NUM) {
-    return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
+    return (lastDroppedToken == RED) ? RED_WINS : YELLOW_WINS;
   }
 
   // Check horizontal
   int horizontal_counter = 0;
   for (int temp_x = 0; temp_x < COL_NUM; temp_x++) {
-    if (game->grid[y][temp_x] == game->grid[y][x]) {
+    if (game->grid[y][temp_x] == lastDroppedToken) {
       horizontal_counter++;
     } else {
       horizontal_counter = 0;
     }
     if (horizontal_counter == CONNECTED_TOKENS_NUM) {
-      return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
+      return (lastDroppedToken == RED) ? RED_WINS : YELLOW_WINS;
     }
   }
 
   // Check diagonal
   int counter_asc = 0;
   int counter_des = 0;
-  // Ascending diagonal
+  Token diagonallyAdjacentToken;
+  bool notOutOfBounds; // to make sure that the index does not wrap around
   for (int temp = -CONNECTED_TOKENS_NUM + 1; temp <= CONNECTED_TOKENS_NUM - 1;
        temp++) {
-    if (game->grid[y + temp][x + temp] == game->grid[y][x] && (y + temp >= 0) &&
-        (y + temp < ROW_NUM) && (x + temp >= 0) &&
-        (x + temp <
-         COL_NUM)) { // to make sure that the index does not wrap around
+
+    // Ascending diagonal
+    diagonallyAdjacentToken = game->grid[y + temp][x + temp];
+    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) && (x + temp >= 0) && (x + temp < COL_NUM);
+    if ((diagonallyAdjacentToken == lastDroppedToken) && notOutOfBounds) { 
       counter_asc++;
     } else {
 
       counter_asc = 0;
     }
     // Descending diagonal
-    if (game->grid[y + temp][x - temp] == game->grid[y][x] && (y + temp >= 0) &&
-        (y + temp < COL_NUM) && (x - temp >= 0) && (x - temp < ROW_NUM)) {
-
+    diagonallyAdjacentToken = game->grid[y + temp][x - temp];
+    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) && (x - temp >= 0) && (x - temp < COL_NUM);
+    if ((diagonallyAdjacentToken == lastDroppedToken) && notOutOfBounds) {
       counter_des++;
     } else {
       counter_des = 0;
@@ -111,7 +115,7 @@ GameState game_check_state(Game *game, int x) {
 
     if (counter_asc == CONNECTED_TOKENS_NUM ||
         counter_des == CONNECTED_TOKENS_NUM) {
-      return (game->grid[y][x] == RED) ? RED_WINS : YELLOW_WINS;
+      return (lastDroppedToken == RED) ? RED_WINS : YELLOW_WINS;
     }
   }
 
