@@ -1,4 +1,5 @@
 #include "../include/InputManager.h"
+#include "../include/Types.h"
 
 bool validate_input(char *string, int *integer) {
   int i = 0;

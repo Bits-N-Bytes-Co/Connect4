@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_INPUT_LENGTH 50
-
 /**
   Parses the char* `string` into a positive integer if `string` is of the right
   format, and puts it in int* `integer`, else it returns `false`
