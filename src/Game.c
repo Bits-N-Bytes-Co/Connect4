@@ -1,58 +1,7 @@
 #include "../include/Game.h"
 
-void game_end_screen(Game *game) {
-  CLEAR();
-  printf("-----------------------------------------------------------------"
-         "\n\n\n\n\n");
-  switch (game->game_state) {
-  case ONGOING:
-    printf(
-        "                 ERROR: the game is not over yet                 \n");
-    break;
-  case RED_WINS:
-    printf("                            \033[0;31mRED WON!\033[0m              "
-           "               \n");
-    break;
-  case YELLOW_WINS:
-    printf("                         \033[0;33mYELLOW WON!\033[0m              "
-           "             \n");
-    break;
-  case TIE:
-    printf("                            \033[0;32mTIE!\033[0m                  "
-           "             \n");
-    break;
-  case RED_WON_BY_TIME:
-    printf("                            \033[0;31mRED WON BY TIME!\033[0m      "
-           "                         \n");
-    break;
-  case YELLOW_WON_BY_TIME:
-    printf(
-        "                            \033[0;33mYELLOW WON BY TIME!\033[0m      "
-        "                         \n");
-    break;
-  default:
-    break;
-  }
-  printf("\n");
-  game->players[0].token == RED
-      ? printf("                      \033[0;31m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[0].name, (int)game->players[0].total_time)
-      : printf("                      \033[0;33m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[0].name, (int)game->players[0].total_time);
-  game->players[1].token == RED
-      ? printf("                      \033[0;31m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[1].name, (int)game->players[1].total_time)
-      : printf("                      \033[0;33m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[1].name, (int)game->players[1].total_time);
-  printf("\n\n\n\n\n-----------------------------------------------------------"
-         "------\n");
-}
-
-GameState game_check_state(Game *game, int x) { //note: rows are y and columns are x.
+GameState game_check_state(Game *game, int x) {
+  // rows are y and columns are x.
   int y = 0;
   while (y < ROW_NUM && game->grid[y][x] != EMPTY) {
     y++;
@@ -94,19 +43,19 @@ GameState game_check_state(Game *game, int x) { //note: rows are y and columns a
   bool notOutOfBounds; // to make sure that the index does not wrap around
   for (int temp = -CONNECTED_TOKENS_NUM + 1; temp <= CONNECTED_TOKENS_NUM - 1;
        temp++) {
-
     // Ascending diagonal
     diagonallyAdjacentToken = game->grid[y + temp][x + temp];
-    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) && (x + temp >= 0) && (x + temp < COL_NUM);
-    if ((diagonallyAdjacentToken == lastDroppedToken) && notOutOfBounds) { 
+    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) &&
+                     (x + temp >= 0) && (x + temp < COL_NUM);
+    if ((diagonallyAdjacentToken == lastDroppedToken) && notOutOfBounds) {
       counter_asc++;
     } else {
-
       counter_asc = 0;
     }
     // Descending diagonal
     diagonallyAdjacentToken = game->grid[y + temp][x - temp];
-    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) && (x - temp >= 0) && (x - temp < COL_NUM);
+    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) &&
+                     (x - temp >= 0) && (x - temp < COL_NUM);
     if ((diagonallyAdjacentToken == lastDroppedToken) && notOutOfBounds) {
       counter_des++;
     } else {
@@ -125,17 +74,18 @@ GameState game_check_state(Game *game, int x) { //note: rows are y and columns a
       return ONGOING;
     }
   }
+
   if (game->players[0].total_time > game->players[1].total_time) {
-    printf("%s's time (%d): %.3fs\n", game->players[0].name,
-           game->players[0].token, game->players[0].total_time);
-    printf("%s's time (%d): %.3fs\n", game->players[1].name,
-           game->players[1].token, game->players[1].total_time);
+    // printf("%s's time (%d): %.3fs\n", game->players[0].name,
+    //        game->players[0].token, game->players[0].total_time);
+    // printf("%s's time (%d): %.3fs\n", game->players[1].name,
+    //        game->players[1].token, game->players[1].total_time);
     return game->players[1].token == RED ? RED_WON_BY_TIME : YELLOW_WON_BY_TIME;
   } else if (game->players[0].total_time < game->players[1].total_time) {
-    printf("%s's time (%d): %.3fs\n", game->players[0].name,
-           game->players[0].token, game->players[0].total_time);
-    printf("%s's time (%d): %.3fs\n", game->players[1].name,
-           game->players[1].token, game->players[1].total_time);
+    // printf("%s's time (%d): %.3fs\n", game->players[0].name,
+    //        game->players[0].token, game->players[0].total_time);
+    // printf("%s's time (%d): %.3fs\n", game->players[1].name,
+    //        game->players[1].token, game->players[1].total_time);
     return game->players[0].token == RED ? RED_WON_BY_TIME : YELLOW_WON_BY_TIME;
   } else {
     return TIE;
@@ -152,48 +102,8 @@ bool game_put_token(Game *game, int x) {
   return false;
 }
 
-void game_show(Game *game) {
-  CLEAR();
-  printf("\033[0;32mTimer\033[0m\n");
-  printf("%s: %d s\t", game->players[0].name, (int)game->players[0].total_time);
-  printf("%s: %d s\n", game->players[1].name, (int)game->players[1].total_time);
-  printf("|  1 |  2 |  3 |  4 |  5 |  6 |  7 |\n");
-  printf("| -- + -- + -- + -- + -- + -- + -- |\n");
-  for (int y = ROW_NUM - 1; y >= 0; y--) {
-    printf("|");
-    for (int x = 0; x < COL_NUM; x++) {
-      if (game->grid[y][x] == RED) {
-        PRINTREDTOKEN();
-        printf("|");
-      } else if (game->grid[y][x] == YELLOW) {
-        PRINTYELLOWTOKEN();
-        printf("|");
-      } else {
-        printf("    |");
-      }
-    }
-    printf("\n");
-    printf("| -- + -- + -- + -- + -- + -- + -- |\n");
-  }
-}
-
-void game_players_screen(Game *game) {
-  CLEAR();
-  char a[MAX_INPUT_LENGTH];
-
-  for (int i = 0; i < PLAYERS_NUM; i++) {
-    printf("Player %d:\n", (i + 1));
-    printf("Name: %s\n", game->players[i].name);
-    printf("Token: %s\n\n", (game->players[i].token == RED)
-                                ? "\033[0;31mRED\033[0m"
-                                : "\033[0;33mYELLOW\033[0m");
-  }
-  printf("\033[0;34mPress enter to continue\033[0m");
-  fgets(a, MAX_INPUT_LENGTH, stdin);
-}
-
 void game_init(Game *game) {
-  STARTSCREEN();
+  print_start_screen();
 
   // Initializing the grid
   for (int i = 0; i < ROW_NUM; i++) {
@@ -287,7 +197,7 @@ void game_init(Game *game) {
 
 void game_run_turn(Game *game) {
   int chosen_col = 0;
-  game_show(game);
+  print_grid(game);
   // Asks for input and drops the token
   game->players[game->current_player_index].token == RED
       ? printf("\033[0;31m%s's\033[0m turn. ",
@@ -316,6 +226,6 @@ void game_run(Game *game) {
     game_run_turn(game);
   }
 
-  game_show(game);
-  game_end_screen(game);
+  print_grid(game);
+  print_end_screen(game);
 }

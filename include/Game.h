@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Graphics.h"
 #include "InputManager.h"
+#include "OutputManager.h"
 #include "Types.h"
 #include <time.h>
 
@@ -22,62 +22,46 @@
 GameState game_check_state(Game *game, int x);
 
 /**
-Inserts token into column, returns true if it works and false otherwise
-@input:
-  Game `game`
-  int `x` representing column that will receive token
-@assumes:
-  Game `game` is initialized
-@returns:
-  bool: `true` if column `x` was not filled, `false` otherwise
+  Inserts token into column, returns true if it works and false otherwise
+  @input:
+    Game `game`
+    int `x` representing column that will receive token
+  @assumes:
+    Game `game` is initialized
+  @returns:
+    bool: `true` if column `x` was not filled, `false` otherwise
 */
 bool game_put_token(Game *game, int x);
 
 /**
-Prints out the game grid to stdout
-@input:
-  Game `game`
-@assumes:
-  `game` has been initialized
-*/
-void game_show(Game *game);
-
-/**
-Prints the tokens each player has after flipping a coin
-@input:
-  Game `game`
-*/
-void game_players_screen(Game *game);
-
-/**
-Initializes Game `game` and asks players for their names
-@input:
-  Game `game`
+  Initializes Game `game` and asks players for their names
+  @input:
+    Game `game`
 */
 void game_init(Game *game);
 
 /**
-Runs the current player's turn and changes who's turn is next
-@input:
-  Game `game`
-@assumes:
-  Game `game` has been initialized
-  `game_state` is ONGOING
+  Runs the current player's turn and changes who's turn is next
+  @input:
+    Game `game`
+  @assumes:
+    Game `game` has been initialized
+    `game_state` is ONGOING
 */
 void game_run_turn(Game *game);
 
 /**
-Runs the Game `game` until the `game_state` is not `ONGOING`
-@input:
-  Game `game`
-@assumes:
-  Game has been initialized
+  Runs the Game `game` until the `game_state` is not `ONGOING`
+  @input:
+    Game `game`
+  @assumes:
+    Game has been initialized
 */
 void game_run(Game *game);
 
 /**
-Prints which player won and displays the amount of time each of them took
-@input:
-  Game `game`
+  Prints which player won and displays the amount of time each of them took
+  @input:
+    Game `game`
 */
-void game_end_screen(Game *game);
+void print_end_screen(Game *game);
