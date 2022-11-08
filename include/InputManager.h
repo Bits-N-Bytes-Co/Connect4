@@ -34,4 +34,4 @@ void remove_delimiter(char *string);
   @input:
     int* `col` representing the given column number
 */
-void take_valid_input(int *col);
+int take_valid_input(Game *game);

@@ -6,6 +6,8 @@
 #define CONNECTED_TOKENS_NUM 4
 #define MAX_INPUT_LENGTH 50
 
+typedef struct game Game;
+
 typedef enum token { EMPTY = 0, RED = 1, YELLOW = 2 } Token;
 
 typedef enum gameState {
@@ -21,6 +23,7 @@ typedef struct player {
   char name[MAX_INPUT_LENGTH];
   Token token;
   double total_time;
+  int (*strategy)(Game *game);
 } Player;
 
 typedef struct game {

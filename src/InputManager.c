@@ -48,18 +48,21 @@ void remove_delimiter(char *string) {
   }
 }
 
-void take_valid_input(int *col) {
+int take_valid_input(Game *game) {
+  int input = 0;
+  int *input_ptr = &input;
   bool input_is_valid = true;
 
   do {
     char buffer[MAX_INPUT_LENGTH];
     fgets(buffer, MAX_INPUT_LENGTH, stdin);
 
-    input_is_valid = validate_input(buffer, col);
-    input_is_valid = input_is_valid && *col > 0 && *col < 8;
+    input_is_valid = validate_input(buffer, &input);
+    input_is_valid = input_is_valid && input > 0 && input <= COL_NUM;
 
     if (!input_is_valid) {
       printf("Invalid input. Please enter an integer between 1 and 7: ");
     }
   } while (!input_is_valid);
+  return input - 1;
 }

@@ -1,7 +1,9 @@
 #include "../include/Game.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 GameState game_check_state(Game *game, int x) {
-  // rows are y and columns are x.
   int y = 0;
   while (y < ROW_NUM && game->grid[y][x] != EMPTY) {
     y++;
@@ -93,6 +95,9 @@ GameState game_check_state(Game *game, int x) {
 }
 
 bool game_put_token(Game *game, int x) {
+  if (x < 0 || x > COL_NUM - 1) {
+    return false;
+  }
   for (int y = 0; y < ROW_NUM; y++) {
     if (game->grid[y][x] == EMPTY) {
       game->grid[y][x] = game->players[game->current_player_index].token;
@@ -113,8 +118,6 @@ void game_init(Game *game) {
   }
 
   // Initializing the players
-  srand((unsigned int)time(NULL));
-
   char **taken_names = malloc(sizeof(char *) * PLAYERS_NUM);
   int name_index = 0;
   bool name_valid;
@@ -180,6 +183,7 @@ void game_init(Game *game) {
     game->players[index].name[i] = '\0';
     game->players[index].total_time = 0;
     game->players[index].token = (Token)(index + 1);
+    game->players[index].strategy = take_valid_input;
   }
   printf("\n");
 
@@ -205,14 +209,12 @@ void game_run_turn(Game *game) {
       : printf("\033[0;33m%s's\033[0m turn. ",
                game->players[game->current_player_index].name);
   time_t start = time(NULL);
-  take_valid_input(&chosen_col);
-  chosen_col--;
-  while (!game_put_token(game, chosen_col)) {
-    printf("Column %d is full, please choose another column: ", chosen_col + 1);
-    take_valid_input(&chosen_col);
-    chosen_col--;
+  chosen_col = game->players[game->current_player_index].strategy(game);
+  if (!game_put_token(game, chosen_col)) {
+    printf("ERROR: Column %d is invalid, the strategy function has a bug!\n",
+           chosen_col + 1);
+    exit(1);
   };
-
   time_t end = time(NULL);
   double diff = end - start;
   game->players[game->current_player_index].total_time += diff;
