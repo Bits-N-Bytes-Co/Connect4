@@ -29,9 +29,9 @@ bool validate_input(char *string, int *integer);
 void remove_delimiter(char *string);
 
 /**
-  Takes the int* `col` representing the given column number, and if it is
-  invalid, prompts to enter again.
-  @input:
-    int* `col` representing the given column number
+  Takes input from stdin, while the input is invalid (not a single positive
+  integer), prompts to enter again.
+  @returns:
+    An `int` representing a vald int
 */
-int take_valid_input(Game *game);
+int take_valid_input();

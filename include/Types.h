@@ -5,10 +5,17 @@
 #define PLAYERS_NUM 2
 #define CONNECTED_TOKENS_NUM 4
 #define MAX_INPUT_LENGTH 50
+#define TIME_DELAY_PER_TURN 0.5 // in seconds
 
 typedef struct game Game;
 
 typedef enum token { EMPTY = 0, RED = 1, YELLOW = 2 } Token;
+
+typedef enum gameMode {
+  SIMULATION = 0,
+  SINGLE_PLAYER = 1,
+  MULTI_PLAYER = 2
+} GameMode;
 
 typedef enum gameState {
   ONGOING = 0,
@@ -31,4 +38,5 @@ typedef struct game {
   Player players[PLAYERS_NUM];
   int current_player_index;
   GameState game_state;
+  GameMode game_mode;
 } Game;

@@ -1,9 +1,9 @@
 #include "../include/Game.h"
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 GameState game_check_state(Game *game, int x) {
+  // rows are y and columns are x.
   int y = 0;
   while (y < ROW_NUM && game->grid[y][x] != EMPTY) {
     y++;
@@ -95,9 +95,8 @@ GameState game_check_state(Game *game, int x) {
 }
 
 bool game_put_token(Game *game, int x) {
-  if (x < 0 || x > COL_NUM - 1) {
+  if (x < 0 || x > COL_NUM - 1)
     return false;
-  }
   for (int y = 0; y < ROW_NUM; y++) {
     if (game->grid[y][x] == EMPTY) {
       game->grid[y][x] = game->players[game->current_player_index].token;
@@ -110,6 +109,22 @@ bool game_put_token(Game *game, int x) {
 void game_init(Game *game) {
   print_start_screen();
 
+  // Selecting game mode
+  printf("------GAME MODES:------\n");
+  printf("1) Simulation\n");
+  printf("2) Single-Player\n");
+  printf("3) Multi-Player\n");
+  printf("Enter your choice (1-3): ");
+  int input_game_mode = take_valid_input() - 1;
+  while ((input_game_mode != SIMULATION) &&
+         (input_game_mode != SINGLE_PLAYER) &&
+         (input_game_mode != MULTI_PLAYER)) {
+    printf("Please enter an integer from 1 to 3: ");
+    input_game_mode = take_valid_input();
+  }
+  game->game_mode = input_game_mode;
+  clear_screen();
+
   // Initializing the grid
   for (int i = 0; i < ROW_NUM; i++) {
     for (int j = 0; j < COL_NUM; j++) {
@@ -118,109 +133,150 @@ void game_init(Game *game) {
   }
 
   // Initializing the players
-  char **taken_names = malloc(sizeof(char *) * PLAYERS_NUM);
-  int name_index = 0;
-  bool name_valid;
-  printf("Please enter your names \n");
-
-  for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
-    do {
-      name_valid = true;
-      int i = 0;
-      char input[MAX_INPUT_LENGTH];
-      printf("Name: ");
-
-      fgets(input, MAX_INPUT_LENGTH, stdin);
-      // If the input is "\0"
-      if (strlen(input) == 1) {
-        printf("Invalid input. Names cannot be empty. Please try "
-               "again.\n");
-        name_valid = false;
-        continue;
-      }
-
-      remove_delimiter(input);
-
-      // If the input contains a space
-      while (input[i] != '\0') {
-        if (input[i] == ' ' || input[i] == '\t') {
-          name_valid = false;
-          printf("Invalid input. Names cannot contain white spaces. Please try "
-                 "again.\n");
-          break;
-        }
-        i++;
-      }
-      if (!name_valid) {
-        continue;
-      }
-
-      // Allocating the name to game
-      taken_names[name_index] = malloc(sizeof(char *));
-      int j = 0;
-      while (input[j] != '\0') {
-        taken_names[name_index][j] = input[j];
-        j++;
-      }
-      taken_names[name_index][j] = '\0';
-      name_index++;
-    } while (!name_valid);
+  bool taken_indexes[PLAYERS_NUM];
+  for (int i = 0; i < PLAYERS_NUM; i++) {
+    taken_indexes[i] = false;
   }
 
-  bool taken_indexes[PLAYERS_NUM];
+  switch (game->game_mode) {
+  case (SIMULATION):
+    printf("------GAME STRATEGIES:------\n");
+    printf("1) Random\n");
+    printf("2) Always First\n");
+    printf("3) Minimax\n");
+    printf("----------------------------\n");
+    break;
+  case (SINGLE_PLAYER):
+    printf("------GAME STRATEGIES:------\n");
+    printf("1) Random\n");
+    printf("2) Always First\n");
+    printf("3) Minimax\n");
+    printf("----------------------------\n");
+    printf("Please enter your name: \n");
+    break;
+  case (MULTI_PLAYER):
+    printf("Please enter your names: \n");
+    break;
+  }
+
   for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
+    bool is_user = ((player_num == 0) && (game->game_mode == SINGLE_PLAYER)) ||
+                   (game->game_mode == MULTI_PLAYER);
+
+    // Randomize index
     int index = rand() % PLAYERS_NUM;
     while (taken_indexes[index] == true) {
       index = (index + 1) % PLAYERS_NUM;
     }
     taken_indexes[index] = true;
-    // Copies the content of taken_names[player_num] in players[index].name
-    int i = 0;
-    while (taken_names[player_num][i] != '\0') {
-      game->players[index].name[i] = taken_names[player_num][i];
-      i++;
+
+    // Set player name
+    if (is_user) {
+      char input_name[MAX_INPUT_LENGTH];
+      while (true) {
+        printf("Name: ");
+        fgets(input_name, MAX_INPUT_LENGTH, stdin);
+
+        // If the input is "\0"
+        if (strlen(input_name) == 1) {
+          printf("Invalid input. Names cannot be empty. Please try "
+                 "again.\n");
+          continue;
+        }
+        remove_delimiter(input_name);
+
+        // If the input contains a space
+        int i = 0;
+        while (input_name[i] != '\0') {
+          if (input_name[i] == ' ' || input_name[i] == '\t') {
+            printf(
+                "Invalid input. Names cannot contain white spaces. Please try "
+                "again.\n");
+            break;
+          }
+          i++;
+        }
+        if (input_name[i] == ' ' || input_name[i] == '\t') {
+          continue;
+        }
+        break;
+      }
+
+      // Copying the content of input_name in players[index].name
+      int j = 0;
+      while (input_name[j] != '\0') {
+        game->players[index].name[j] = input_name[j];
+        j++;
+      }
+      game->players[index].name[j] = '\0';
+    } else {
+      char bot_name[MAX_INPUT_LENGTH] = "Bot";
+      int j = 0;
+      while (bot_name[j] != '\0') {
+        game->players[index].name[j] = bot_name[j];
+        j++;
+      }
+      if (game->game_mode == SIMULATION) {
+        game->players[index].name[j] = index + '1';
+        j++;
+      }
+      game->players[index].name[j] = '\0';
     }
-    game->players[index].name[i] = '\0';
-    game->players[index].total_time = 0;
+
+    // Set player strategy
+    if (is_user) {
+      game->players[index].strategy = strategy_user_input;
+    } else {
+      printf("Enter %s's strategy (1-3): ", game->players[index].name);
+      int input_strategy = take_valid_input();
+      while ((input_strategy != 1) && (input_strategy != 2) &&
+             (input_strategy != 3)) {
+        printf("Please enter an integer from 1 to 3: ");
+        input_strategy = take_valid_input();
+      }
+      if (input_strategy == 1)
+        game->players[index].strategy = strategy_random;
+      if (input_strategy == 2)
+        game->players[index].strategy = strategy_always_first;
+      if (input_strategy == 3)
+        game->players[index].strategy = strategy_minimax;
+    }
+
     game->players[index].token = (Token)(index + 1);
-    game->players[index].strategy = take_valid_input;
+    game->players[index].total_time = 0;
   }
   printf("\n");
 
   game->game_state = ONGOING;
   game->current_player_index = 0;
-
-  for (int j = 0; j < PLAYERS_NUM; j++) {
-    free(taken_names[j]);
-  }
-  free(taken_names);
-  taken_names = NULL;
-
   game_players_screen(game);
 }
 
 void game_run_turn(Game *game) {
   int chosen_col = 0;
   print_grid(game);
+
   // Asks for input and drops the token
-  game->players[game->current_player_index].token == RED
-      ? printf("\033[0;31m%s's\033[0m turn. ",
-               game->players[game->current_player_index].name)
-      : printf("\033[0;33m%s's\033[0m turn. ",
-               game->players[game->current_player_index].name);
+  Player current_player = game->players[game->current_player_index];
+
+  printf("\033[0;%dm%s's\033[0m turn. ",
+         (current_player.token == RED) ? 31 : 33, current_player.name);
+
   time_t start = time(NULL);
-  chosen_col = game->players[game->current_player_index].strategy(game);
+  chosen_col = current_player.strategy(game);
   if (!game_put_token(game, chosen_col)) {
     printf("ERROR: Column %d is invalid, the strategy function has a bug!\n",
            chosen_col + 1);
     exit(1);
   };
   time_t end = time(NULL);
-  double diff = end - start;
-  game->players[game->current_player_index].total_time += diff;
+  current_player.total_time += (end - start);
 
   game->current_player_index = (game->current_player_index + 1) % PLAYERS_NUM;
   game->game_state = game_check_state(game, chosen_col);
+
+  while (time(NULL) - start < TIME_DELAY_PER_TURN)
+    ;
 }
 
 void game_run(Game *game) {

@@ -1,4 +1,5 @@
 #include "../include/InputManager.h"
+#include <stdbool.h>
 
 bool validate_input(char *string, int *integer) {
   int i = 0;
@@ -48,21 +49,14 @@ void remove_delimiter(char *string) {
   }
 }
 
-int take_valid_input(Game *game) {
+int take_valid_input() {
   int input = 0;
-  int *input_ptr = &input;
-  bool input_is_valid = true;
+  char buffer[MAX_INPUT_LENGTH];
 
-  do {
-    char buffer[MAX_INPUT_LENGTH];
+  fgets(buffer, MAX_INPUT_LENGTH, stdin);
+  while (!validate_input(buffer, &input)) {
+    printf("Invalid input. Please enter a single positive integer: ");
     fgets(buffer, MAX_INPUT_LENGTH, stdin);
-
-    input_is_valid = validate_input(buffer, &input);
-    input_is_valid = input_is_valid && input > 0 && input <= COL_NUM;
-
-    if (!input_is_valid) {
-      printf("Invalid input. Please enter an integer between 1 and 7: ");
-    }
-  } while (!input_is_valid);
-  return input - 1;
+  }
+  return input;
 }
