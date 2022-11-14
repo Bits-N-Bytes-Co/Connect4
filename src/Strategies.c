@@ -18,6 +18,10 @@ int strategy_random(Game *game) {
 
 int strategy_user_input(Game *game) {
   int input;
+  Player current_player = game->players[game->current_player_index];
+
+  printf("\033[0;%dm%s's\033[0m turn: ",
+         (current_player.token == RED) ? 31 : 33, current_player.name);
   while (true) {
     input = take_valid_input();
     if ((input <= 0) || (input > COL_NUM)) {

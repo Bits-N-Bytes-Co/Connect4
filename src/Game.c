@@ -251,9 +251,6 @@ void game_run_turn(Game *game) {
   // Asks for input and drops the token
   Player current_player = game->players[game->current_player_index];
 
-  printf("\033[0;%dm%s's\033[0m turn. ",
-         (current_player.token == RED) ? 31 : 33, current_player.name);
-
   double start = get_time();
   chosen_col = current_player.strategy(game);
   if (!game_put_token(game, chosen_col)) {
