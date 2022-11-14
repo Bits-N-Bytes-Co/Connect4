@@ -78,16 +78,8 @@ GameState game_check_state(Game *game, int x) {
   }
 
   if (game->players[0].total_time > game->players[1].total_time) {
-    // printf("%s's time (%d): %.3fs\n", game->players[0].name,
-    //        game->players[0].token, game->players[0].total_time);
-    // printf("%s's time (%d): %.3fs\n", game->players[1].name,
-    //        game->players[1].token, game->players[1].total_time);
     return game->players[1].token == RED ? RED_WON_BY_TIME : YELLOW_WON_BY_TIME;
   } else if (game->players[0].total_time < game->players[1].total_time) {
-    // printf("%s's time (%d): %.3fs\n", game->players[0].name,
-    //        game->players[0].token, game->players[0].total_time);
-    // printf("%s's time (%d): %.3fs\n", game->players[1].name,
-    //        game->players[1].token, game->players[1].total_time);
     return game->players[0].token == RED ? RED_WON_BY_TIME : YELLOW_WON_BY_TIME;
   } else {
     return TIE;
@@ -262,20 +254,20 @@ void game_run_turn(Game *game) {
   printf("\033[0;%dm%s's\033[0m turn. ",
          (current_player.token == RED) ? 31 : 33, current_player.name);
 
-  time_t start = time(NULL);
+  double start = get_time();
   chosen_col = current_player.strategy(game);
   if (!game_put_token(game, chosen_col)) {
     printf("ERROR: Column %d is invalid, the strategy function has a bug!\n",
            chosen_col + 1);
     exit(1);
   };
-  time_t end = time(NULL);
-  current_player.total_time += (end - start);
+  double end = get_time();
+  game->players[game->current_player_index].total_time += (end - start);
 
   game->current_player_index = (game->current_player_index + 1) % PLAYERS_NUM;
   game->game_state = game_check_state(game, chosen_col);
 
-  while (time(NULL) - start < TIME_DELAY_PER_TURN)
+  while (get_time() - start < TIME_DELAY_PER_TURN)
     ;
 }
 

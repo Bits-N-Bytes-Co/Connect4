@@ -1,2 +1,7 @@
-all: src/Game.c src/main.c src/InputManager.c src/OutputManager.c src/Strategies.c
-	gcc -o Connect4.out src/Game.c src/main.c src/InputManager.c src/OutputManager.c src/Strategies.c
+ifeq ($(OS), Windows_NT)
+	out = Connect4.exe
+else 
+	out = Connect4.out
+endif
+all: src/Game.c src/main.c src/InputManager.c src/OutputManager.c src/Strategies.c src/Utils.c
+	gcc -o $(out) src/*.c

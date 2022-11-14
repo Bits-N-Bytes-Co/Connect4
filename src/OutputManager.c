@@ -41,20 +41,12 @@ void print_end_screen(Game *game) {
     break;
   }
   printf("\n");
-  game->players[0].token == RED
-      ? printf("                      \033[0;31m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[0].name, (int)game->players[0].total_time)
-      : printf("                      \033[0;33m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[0].name, (int)game->players[0].total_time);
-  game->players[1].token == RED
-      ? printf("                      \033[0;31m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[1].name, (int)game->players[1].total_time)
-      : printf("                      \033[0;33m%s\033[0m: %d seconds        "
-               "          \n",
-               game->players[1].name, (int)game->players[1].total_time);
+  for (int player_num = 0; player_num < PLAYERS_NUM; player_num++) {
+    printf("                      \033[0;%dm%s\033[0m: %.3f seconds        "
+           "          \n",
+           (game->players[player_num].token == RED) ? 31 : 33,
+           game->players[player_num].name, game->players[player_num].total_time);
+  }
   printf("\n\n\n\n\n-----------------------------------------------------------"
          "------\n");
 }
@@ -131,8 +123,8 @@ void print_start_screen() {
 void print_grid(Game *game) {
   clear_screen();
   printf("\033[0;32mTimer\033[0m\n");
-  printf("%s: %d s\t", game->players[0].name, (int)game->players[0].total_time);
-  printf("%s: %d s\n", game->players[1].name, (int)game->players[1].total_time);
+  printf("%s: %.3f s\t", game->players[0].name, game->players[0].total_time);
+  printf("%s: %.3f s\n", game->players[1].name, game->players[1].total_time);
   printf("|  1 |  2 |  3 |  4 |  5 |  6 |  7 |\n");
   printf("| -- + -- + -- + -- + -- + -- + -- |\n");
   for (int y = ROW_NUM - 1; y >= 0; y--) {
