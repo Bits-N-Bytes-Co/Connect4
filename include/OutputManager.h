@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Types.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 /**
   Clears the terminal screen

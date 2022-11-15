@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "../include/OutputManager.h"
 
 #ifdef _WIN64
@@ -45,7 +48,8 @@ void print_end_screen(Game *game) {
     printf("                      \033[0;%dm%s\033[0m: %.3f seconds        "
            "          \n",
            (game->players[player_num].token == RED) ? 31 : 33,
-           game->players[player_num].name, game->players[player_num].total_time);
+           game->players[player_num].name,
+           game->players[player_num].total_time);
   }
   printf("\n\n\n\n\n-----------------------------------------------------------"
          "------\n");

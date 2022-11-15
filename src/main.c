@@ -1,3 +1,7 @@
+#include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "../include/Game.h"
 
 int main() {

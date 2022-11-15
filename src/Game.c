@@ -1,6 +1,14 @@
-#include "../include/Game.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "../include/Game.h"
+#include "../include/InputManager.h"
+#include "../include/OutputManager.h"
+#include "../include/Strategies.h"
+#include "../include/Utils.h"
 
 GameState game_check_state(Game *game, int x) {
   // rows are y and columns are x.

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <stdlib.h>
-#include <time.h>
-
-#include "InputManager.h"
 #include "Types.h"
 
 int strategy_random(Game *game);

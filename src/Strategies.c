@@ -1,5 +1,9 @@
-#include "../include/Strategies.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "../include/InputManager.h"
+#include "../include/Strategies.h"
 
 int strategy_random(Game *game) {
   int possibilities_length = 0;

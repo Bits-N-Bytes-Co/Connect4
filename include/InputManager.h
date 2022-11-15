@@ -1,11 +1,7 @@
 #pragma once
 
 #include "../include/Types.h"
-#include <ctype.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /**
   Parses the char* `string` into a positive integer if `string` is of the right

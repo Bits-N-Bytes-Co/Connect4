@@ -1,12 +1,6 @@
 #pragma once
 
-#include <time.h>
-
-#include "InputManager.h"
-#include "OutputManager.h"
-#include "Strategies.h"
 #include "Types.h"
-#include "Utils.h"
 
 /**
   Checks whether Game `game` is `ONGOING`, or if a player has won

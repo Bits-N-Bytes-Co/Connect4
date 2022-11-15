@@ -1,5 +1,10 @@
 #include "../include/InputManager.h"
+
+#include <ctype.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 bool validate_input(char *string, int *integer) {
   int i = 0;
