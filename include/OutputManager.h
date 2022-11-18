@@ -39,7 +39,7 @@ void print_grid(Game *game);
 */
 void print_end_screen(Game *game);
 
-#ifdef _WIN64
+#ifdef _WIN32
 #define PRINTREDTOKEN() printf(" \033[0;31m%c%c\033[0m ", 219, 219);
 #define PRINTYELLOWTOKEN() printf(" \033[0;33m%c%c\033[0m ", 219, 219);
 #else

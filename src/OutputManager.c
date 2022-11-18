@@ -3,7 +3,7 @@
 
 #include "../include/OutputManager.h"
 
-#ifdef _WIN64
+#ifdef _WIN32
 #define CLEAR_COMMAND "cls"
 #else
 #define CLEAR_COMMAND "clear"
@@ -60,7 +60,7 @@ void print_start_screen() {
   char b[MAX_INPUT_LENGTH];
   printf("-------------------------------------------------------------------"
          "------\n\n\n\n");
-#ifdef _WIN64
+#ifdef _WIN32
   int a = 177;
   printf("                                                                   "
          "\033[0;31m%c%c%c%c\033[0m  \n",
