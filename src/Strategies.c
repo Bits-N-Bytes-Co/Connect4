@@ -8,6 +8,8 @@
 #include "../include/Strategies.h"
 #include "../include/Utils.h"
 
+#define depth_limit 15
+
 int strategy_random(Game *game) {
   int possibilities_length = 0;
   int possibilities[COL_NUM];
@@ -225,6 +227,10 @@ int strategy_minimax_helper(Token **grid, Token self, int depth, int alpha,
           return col;
       }
     }
+  }
+
+  if (depth >= depth_limit) {
+    return 0;
   }
 
   int best_score = ((self == RED) ? -1 : 1) * (ROW_NUM * COL_NUM + 1);
