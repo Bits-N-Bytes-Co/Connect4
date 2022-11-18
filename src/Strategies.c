@@ -6,9 +6,8 @@
 
 #include "../include/InputManager.h"
 #include "../include/Strategies.h"
+#include "../include/Types.h"
 #include "../include/Utils.h"
-
-#define depth_limit 15
 
 int strategy_random(Game *game) {
   int possibilities_length = 0;

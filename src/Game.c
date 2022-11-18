@@ -8,6 +8,7 @@
 #include "../include/InputManager.h"
 #include "../include/OutputManager.h"
 #include "../include/Strategies.h"
+#include "../include/Types.h"
 #include "../include/Utils.h"
 
 GameState game_check_state(Game *game, int x) {
@@ -140,17 +141,17 @@ void game_init(Game *game) {
 
   switch (game->game_mode) {
   case (SIMULATION):
-    printf("------GAME STRATEGIES:------\n");
-    printf("1) Random\n");
-    printf("2) Always First\n");
-    printf("3) Minimax\n");
+    printf("------GAME DIFFICULTIES:------\n");
+    printf("1) Easy\n");
+    printf("2) Medium\n");
+    printf("3) Hard\n");
     printf("----------------------------\n");
     break;
   case (SINGLE_PLAYER):
-    printf("------GAME STRATEGIES:------\n");
-    printf("1) Random\n");
-    printf("2) Always First\n");
-    printf("3) Minimax\n");
+    printf("------GAME DIFFICULTIES:------\n");
+    printf("1) Easy\n");
+    printf("2) Medium\n");
+    printf("3) Hard\n");
     printf("----------------------------\n");
     printf("Please enter your name: \n");
     break;
@@ -234,12 +235,13 @@ void game_init(Game *game) {
         printf("Please enter an integer from 1 to 3: ");
         input_strategy = take_valid_input();
       }
+      game->players[index].strategy = strategy_minimax;
       if (input_strategy == 1)
-        game->players[index].strategy = strategy_random;
+        depth_limit = EASY_DEPTH_LIMIT;
       if (input_strategy == 2)
-        game->players[index].strategy = strategy_always_first;
+        depth_limit = MEDIUM_DEPTH_LIMIT;
       if (input_strategy == 3)
-        game->players[index].strategy = strategy_minimax;
+        depth_limit = HARD_DEPTH_LIMIT;
     }
 
     game->players[index].token = (Token)(index + 1);

@@ -7,6 +7,11 @@
 #define MAX_INPUT_LENGTH 50
 #define TIME_DELAY_PER_TURN 0.5 // in seconds
 
+#define EASY_DEPTH_LIMIT 2
+#define MEDIUM_DEPTH_LIMIT 8
+#define HARD_DEPTH_LIMIT 16
+extern int depth_limit;
+
 typedef struct game Game;
 
 typedef enum token { EMPTY = 0, RED = 1, YELLOW = 2 } Token;
