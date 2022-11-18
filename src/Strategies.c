@@ -9,6 +9,8 @@
 #include "../include/Types.h"
 #include "../include/Utils.h"
 
+Token self;
+
 int strategy_random(Game *game) {
   int possibilities_length = 0;
   int possibilities[COL_NUM];
@@ -277,6 +279,40 @@ int strategy_minimax_helper(Token **grid, Token self, int depth, int alpha,
 }
 
 int strategy_minimax(Game *game) {
+  int total_tokens = 0;
+  for (int y = 0; y < ROW_NUM; y++) {
+    for (int x = 0; x < COL_NUM; x++) {
+      if (game->grid[y][x] != EMPTY)
+        total_tokens++;
+    }
+  }
+
+  if (total_tokens % 2 == 0) {
+    self = RED;
+  } else if (total_tokens % 2 == 1) {
+    self = YELLOW;
+  }
+
+  if (total_tokens == 0) {
+    return COL_NUM / 2;
+  } else if (total_tokens == 1) {
+    if (game->grid[0][1] != EMPTY) {
+      return 2;
+    } else if (game->grid[0][COL_NUM - 2] != EMPTY) {
+      return COL_NUM - 3;
+    } else {
+      return COL_NUM / 2;
+    }
+  } else if (total_tokens == 2) {
+    if (game->grid[0][COL_NUM - 2] != EMPTY || game->grid[0][COL_NUM - 3] != EMPTY) {
+      return 2;
+    } else if (game->grid[0][2] != EMPTY || game->grid[0][1] != EMPTY) {
+      return COL_NUM - 2;
+    } else {
+      return COL_NUM / 2;
+    }
+  }
+
   Token **grid_copy = calloc(sizeof(Token *), ROW_NUM * 100);
   for (int column = 0; column < COL_NUM; column++) {
     grid_copy[column] = calloc(sizeof(Token), COL_NUM * 100);
@@ -288,8 +324,7 @@ int strategy_minimax(Game *game) {
     }
   }
 
-  Token token = game->players[game->current_player_index].token;
-  int best_col = strategy_minimax_helper(grid_copy, token, 0, INT_MIN, INT_MAX);
+  int best_col = strategy_minimax_helper(grid_copy, self, 0, INT_MIN, INT_MAX);
 
   for (int column = 0; column < COL_NUM; column++) {
     free(grid_copy[column]);
