@@ -111,11 +111,7 @@ void game_init(Game *game) {
   print_start_screen();
 
   // Selecting game mode
-  printf("------GAME MODES:------\n");
-  printf("1) Simulation\n");
-  printf("2) Single-Player\n");
-  printf("3) Multi-Player\n");
-  printf("Enter your choice (1-3): ");
+  game_mode_screen();
   int input_game_mode = take_valid_input() - 1;
   while ((input_game_mode != SIMULATION) &&
          (input_game_mode != SINGLE_PLAYER) &&
@@ -141,18 +137,10 @@ void game_init(Game *game) {
 
   switch (game->game_mode) {
   case (SIMULATION):
-    printf("------GAME DIFFICULTIES:------\n");
-    printf("1) Easy\n");
-    printf("2) Medium\n");
-    printf("3) Hard\n");
-    printf("----------------------------\n");
+    difficulty_screen();
     break;
   case (SINGLE_PLAYER):
-    printf("------GAME DIFFICULTIES:------\n");
-    printf("1) Easy\n");
-    printf("2) Medium\n");
-    printf("3) Hard\n");
-    printf("----------------------------\n");
+    difficulty_screen();
     printf("Please enter your name: \n");
     break;
   case (MULTI_PLAYER):
@@ -284,5 +272,13 @@ void game_run(Game *game) {
   }
 
   print_grid(game);
+  if (game->game_state == TIE)
+    printf("         \033[0;32mTIE\033[0m");
+  else
+    printf((game->players[game->current_player_index].token == YELLOW)
+               ? "         \033[0;31mRED\033[0m Connected 4"
+               : "       \033[0;33mYELLOW\033[0m Connected 4");
+  delay(5.5);
+  clear_screen();
   print_end_screen(game);
 }

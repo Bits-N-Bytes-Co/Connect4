@@ -15,6 +15,10 @@ make
 mingw32-make -f Makefile
 ```
 
+## Demo
+
+<img src="./demo.gif" alt="demo of connect 4"/>
+
 ## License
 Licensed under the [GNU General Public License v3.0](LICENSE) license.
 

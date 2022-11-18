@@ -163,3 +163,20 @@ void game_players_screen(Game *game) {
   printf("\033[0;34mPress enter to continue\033[0m");
   fgets(a, MAX_INPUT_LENGTH, stdin);
 }
+
+void game_mode_screen() {
+  printf("-----------\033[0;32mGAME MODES:\033[0m-----------\n\n");
+  printf("         1) Simulation\n");
+  printf("         2) Single-Player\n");
+  printf("         3) Multi-Player\n\n");
+  printf("---------------------------------\n");
+  printf("Enter your choice (1-3): ");
+}
+
+void difficulty_screen() {
+  printf("------\033[0;32mGAME DIFFICULTIES:\033[0m------\n\n");
+  printf("          1) Easy\n");
+  printf("          2) Medium\n");
+  printf("          3) Hard\n\n");
+  printf("------------------------------\n");
+}
