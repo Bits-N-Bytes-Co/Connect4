@@ -18,3 +18,9 @@ double get_time() {
   return time.tv_sec + time.tv_usec / 1000000.0;
 #endif
 }
+
+void delay(double time) {
+  double start = get_time();
+  while (get_time() - start < time)
+    ;
+}

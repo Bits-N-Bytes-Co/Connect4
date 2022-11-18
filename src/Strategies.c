@@ -1,9 +1,16 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "../include/InputManager.h"
 #include "../include/Strategies.h"
+#include "../include/Utils.h"
+
+typedef struct scenario {
+  int score;
+  int chosen_col;
+} Scenario;
 
 int strategy_random(Game *game) {
   int possibilities_length = 0;
@@ -23,9 +30,9 @@ int strategy_random(Game *game) {
 int strategy_user_input(Game *game) {
   int input;
   Player current_player = game->players[game->current_player_index];
-
   printf("\033[0;%dm%s's\033[0m turn: ",
          (current_player.token == RED) ? 31 : 33, current_player.name);
+
   while (true) {
     input = take_valid_input();
     if ((input <= 0) || (input > COL_NUM)) {
@@ -55,16 +62,209 @@ int strategy_always_first(Game *game) {
   return possibilities[0];
 }
 
-int strategy_minimax(Game *game) {
-  int possibilities_length = 0;
-  int possibilities[COL_NUM];
+bool put_token(Token ***grid, Token token, int col) {
+  if (col < 0 || col >= COL_NUM)
+    return false;
+  for (int y = 0; y < ROW_NUM; y++) {
+    if ((*grid)[y][col] == EMPTY) {
+      (*grid)[y][col] = token;
+      return true;
+    }
+  }
+  return false;
+}
 
-  for (int x = 0; x < COL_NUM; x++) {
-    if (game->grid[ROW_NUM - 1][x] == EMPTY) {
-      possibilities[possibilities_length] = x;
-      possibilities_length++;
+bool remove_token(Token ***grid, Token token, int col) {
+  if (col < 0 || col >= COL_NUM)
+    return false;
+  for (int y = ROW_NUM - 1; y >= 0; y--) {
+    if ((*grid)[y][col] != EMPTY) {
+      (*grid)[y][col] = EMPTY;
+      return true;
+    }
+  }
+  return false;
+}
+
+void grid_show(Token **grid) {
+  printf("| -- + -- + -- + -- + -- + -- + -- |\n");
+  for (int y = ROW_NUM - 1; y >= 0; y--) {
+    printf("|");
+    for (int x = 0; x < COL_NUM; x++) {
+      if (grid[y][x] == RED) {
+        printf(" RR |");
+      } else if (grid[y][x] == YELLOW) {
+        printf(" YY |");
+      } else {
+        printf("    |");
+      }
+    }
+    printf("\n");
+    printf("| -- + -- + -- + -- + -- + -- + -- |\n");
+  }
+}
+
+bool grid_check_tie(Token ***grid) {
+  for (int temp_x = 0; temp_x < COL_NUM; temp_x++) {
+    if ((*grid)[ROW_NUM - 1][temp_x] == EMPTY) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool move_is_valid(Token ***grid, int col) {
+  return (*grid)[ROW_NUM - 1][col] == EMPTY;
+}
+
+bool move_is_win(Token ***grid, Token token, int x) {
+  if (!put_token(grid, token, x)) {
+    printf("ERROR: in put_token\n");
+    exit(1);
+  }
+
+  int y = 0;
+  while (y < ROW_NUM && (*grid)[y][x] != EMPTY) {
+    y++;
+  }
+  y--;
+
+  Token lastDroppedToken = (*grid)[y][x];
+  // Check vertical
+  int vertical_counter = 0;
+  for (int temp_y = y; (temp_y > y - CONNECTED_TOKENS_NUM) && (temp_y >= 0);
+       temp_y--) {
+    if ((*grid)[temp_y][x] == lastDroppedToken) {
+      vertical_counter++;
+    } else {
+      break;
+    }
+  }
+  if (vertical_counter == CONNECTED_TOKENS_NUM) {
+    if (!remove_token(grid, token, x)) {
+      printf("ERROR: in remove_token\n");
+      exit(1);
+    }
+    return true;
+  }
+
+  // Check horizontal
+  int horizontal_counter = 0;
+  for (int temp_x = 0; temp_x < COL_NUM; temp_x++) {
+    if ((*grid)[y][temp_x] == lastDroppedToken) {
+      horizontal_counter++;
+    } else {
+      horizontal_counter = 0;
+    }
+    if (horizontal_counter == CONNECTED_TOKENS_NUM) {
+      if (!remove_token(grid, token, x)) {
+        printf("ERROR: in remove_token\n");
+        exit(1);
+      }
+      return true;
     }
   }
 
-  return possibilities[possibilities_length / 2];
+  // Check diagonal
+  int counter_asc = 0;
+  int counter_des = 0;
+  Token diagonallyAdjacentToken;
+  bool notOutOfBounds; // to make sure that the index does not wrap around
+  for (int temp = -CONNECTED_TOKENS_NUM + 1; temp <= CONNECTED_TOKENS_NUM - 1;
+       temp++) {
+    // Ascending diagonal
+    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) &&
+                     (x + temp >= 0) && (x + temp < COL_NUM);
+    if (notOutOfBounds && ((*grid)[y + temp][x + temp] == lastDroppedToken)) {
+      counter_asc++;
+    } else {
+      counter_asc = 0;
+    }
+
+    // Descending diagonal
+    notOutOfBounds = (y + temp >= 0) && (y + temp < ROW_NUM) &&
+                     (x - temp >= 0) && (x - temp < COL_NUM);
+    if (notOutOfBounds && ((*grid)[y + temp][x - temp] == lastDroppedToken)) {
+      counter_des++;
+    } else {
+      counter_des = 0;
+    }
+
+    if (counter_asc == CONNECTED_TOKENS_NUM ||
+        counter_des == CONNECTED_TOKENS_NUM) {
+      if (!remove_token(grid, token, x)) {
+        printf("ERROR: in remove_token\n");
+        exit(1);
+      }
+      return true;
+    }
+  }
+
+  if (!remove_token(grid, token, x)) {
+    printf("ERROR: in remove_token\n");
+    exit(1);
+  }
+  return false;
+}
+
+Scenario strategy_minimax_helper(Token **grid, Token self, int depth) {
+
+  Token opponent = (self == RED) ? YELLOW : RED;
+  if (grid_check_tie(&grid))
+    return (Scenario){0, 1};
+
+  // if self can win
+  for (int col = 0; col < COL_NUM; col++) {
+    if (move_is_valid(&grid, col) && move_is_win(&grid, self, col)) {
+      if (self == RED)
+        return (Scenario){(ROW_NUM * COL_NUM + 1 - depth) / 2, col};
+      else
+        return (Scenario){-(ROW_NUM * COL_NUM + 1 - depth) / 2, col};
+    }
+  }
+
+  Scenario best = {((self == RED) ? -1 : 1) * (ROW_NUM * COL_NUM + 1), -1};
+  Scenario current;
+  for (int column = 0; column < COL_NUM; column++) {
+    if (move_is_valid(&grid, column)) {
+      if (!put_token(&grid, self, column)) {
+        printf("ERROR: in put_token\n");
+        exit(1);
+      }
+      current = strategy_minimax_helper(grid, opponent, depth + 1);
+      if (!remove_token(&grid, self, column)) {
+        printf("ERROR: in remove_token\n");
+        exit(1);
+      }
+
+      if ((self == RED && current.score > best.score) ||
+          (self == YELLOW && current.score < best.score)) {
+        best.score = current.score;
+        best.chosen_col = column;
+      }
+    }
+  }
+  return best;
+}
+
+int strategy_minimax(Game *game) {
+  Token **grid_copy = calloc(sizeof(Token *), ROW_NUM * 100);
+  for (int column = 0; column < COL_NUM; column++) {
+    grid_copy[column] = calloc(sizeof(Token), COL_NUM * 100);
+  }
+
+  for (int y = 0; y < ROW_NUM; y++) {
+    for (int x = 0; x < COL_NUM; x++) {
+      grid_copy[y][x] = game->grid[y][x];
+    }
+  }
+
+  Token token = game->players[game->current_player_index].token;
+  Scenario best = strategy_minimax_helper(grid_copy, token, 0);
+
+  for (int column = 0; column < COL_NUM; column++) {
+    free(grid_copy[column]);
+  }
+  free(grid_copy);
+  return best.chosen_col;
 }
