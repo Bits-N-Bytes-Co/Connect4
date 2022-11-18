@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,11 +7,6 @@
 #include "../include/InputManager.h"
 #include "../include/Strategies.h"
 #include "../include/Utils.h"
-
-typedef struct scenario {
-  int score;
-  int chosen_col;
-} Scenario;
 
 int strategy_random(Game *game) {
   int possibilities_length = 0;
@@ -207,44 +203,72 @@ bool move_is_win(Token ***grid, Token token, int x) {
   return false;
 }
 
-Scenario strategy_minimax_helper(Token **grid, Token self, int depth) {
+int strategy_minimax_helper(Token **grid, Token self, int depth, int alpha,
+                            int beta) {
 
   Token opponent = (self == RED) ? YELLOW : RED;
   if (grid_check_tie(&grid))
-    return (Scenario){0, 1};
+    return 0;
 
   // if self can win
   for (int col = 0; col < COL_NUM; col++) {
     if (move_is_valid(&grid, col) && move_is_win(&grid, self, col)) {
-      if (self == RED)
-        return (Scenario){(ROW_NUM * COL_NUM + 1 - depth) / 2, col};
-      else
-        return (Scenario){-(ROW_NUM * COL_NUM + 1 - depth) / 2, col};
+      if (self == RED) {
+        if (depth != 0)
+          return (ROW_NUM * COL_NUM + 1 - depth) / 2;
+        else
+          return col;
+      } else {
+        if (depth != 0)
+          return -(ROW_NUM * COL_NUM + 1 - depth) / 2;
+        else
+          return col;
+      }
     }
   }
 
-  Scenario best = {((self == RED) ? -1 : 1) * (ROW_NUM * COL_NUM + 1), -1};
-  Scenario current;
+  int best_score = ((self == RED) ? -1 : 1) * (ROW_NUM * COL_NUM + 1);
+  int best_col = -1;
+  int current_score;
   for (int column = 0; column < COL_NUM; column++) {
     if (move_is_valid(&grid, column)) {
       if (!put_token(&grid, self, column)) {
         printf("ERROR: in put_token\n");
         exit(1);
       }
-      current = strategy_minimax_helper(grid, opponent, depth + 1);
+      current_score =
+          strategy_minimax_helper(grid, opponent, depth + 1, alpha, beta);
       if (!remove_token(&grid, self, column)) {
         printf("ERROR: in remove_token\n");
         exit(1);
       }
 
-      if ((self == RED && current.score > best.score) ||
-          (self == YELLOW && current.score < best.score)) {
-        best.score = current.score;
-        best.chosen_col = column;
+      if ((self == RED && current_score > best_score) ||
+          (self == YELLOW && current_score < best_score)) {
+        best_score = current_score;
+        best_col = column;
+      }
+
+      if (self == RED) {
+        if (beta <= current_score)
+          break;
+        if (alpha < current_score)
+          alpha = current_score;
+      } else {
+        if (alpha >= current_score)
+          break;
+        if (beta > current_score)
+          beta = current_score;
       }
     }
   }
-  return best;
+
+  if (depth == 0) {
+    if (best_col == -1)
+      printf("ERROR: There is a bug in minimax: no node has been visited\n");
+    return best_col;
+  } else
+    return best_score;
 }
 
 int strategy_minimax(Game *game) {
@@ -260,11 +284,11 @@ int strategy_minimax(Game *game) {
   }
 
   Token token = game->players[game->current_player_index].token;
-  Scenario best = strategy_minimax_helper(grid_copy, token, 0);
+  int best_col = strategy_minimax_helper(grid_copy, token, 0, INT_MIN, INT_MAX);
 
   for (int column = 0; column < COL_NUM; column++) {
     free(grid_copy[column]);
   }
   free(grid_copy);
-  return best.chosen_col;
+  return best_col;
 }
