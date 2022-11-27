@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "strategies.h": "c",
-        "inputmanager.h": "c",
-        "time.h": "c",
-        "utils.h": "c",
-        "types.h": "c"
-    }
-}
